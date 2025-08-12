@@ -1,17 +1,19 @@
 name: windows-llvm-build
 
-permissions:
-  contents: write
-
 on:
-  release:
-    types: [published, edited]
-  workflow_dispatch:
+  workflow_call:
     inputs:
-      logLevel:
-        description: 'Log level'
+      tag_name_r:
+        description: 'Release tag'
+        required: false
+        type: string
+      release_name_r:
+        description: 'Release name'
+        required: false
+        type: string
+    secrets:
+      personal_access_token:
         required: true
-        default: 'warning'
 
 jobs:
   build:
