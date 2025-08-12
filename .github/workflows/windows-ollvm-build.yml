@@ -12,6 +12,19 @@ on:
         description: 'Log level'
         required: true
         default: 'warning'
+  workflow_call:
+    inputs:
+      tag_name_r:
+        description: 'Release tag'
+        required: false
+        type: string
+      release_name_r:
+        description: 'Release name'
+        required: false
+        type: string
+    secrets:
+      personal_access_token:
+        required: true
 
 jobs:
   build:
@@ -108,3 +121,13 @@ jobs:
         files: windows-llvm.7z
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload GitHub Release
+      if: github.event_name == 'workflow_call'
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ inputs.tag_name_r }}
+        name: ${{ inputs.release_name_r }}
+        repository: JiaPai12138/OLLVM19
+      env:
+        GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
