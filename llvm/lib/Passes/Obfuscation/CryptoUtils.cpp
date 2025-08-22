@@ -616,18 +616,6 @@ const uint32_t masks[32] = {
 
 CryptoUtils::CryptoUtils() { seeded = false; }
 
-uint32_t CryptoUtils::scramble32(
-    uint32_t in, std::unordered_map<uint32_t /*IDX*/, uint32_t /*VAL*/> &VMap) {
-  if (VMap.find(in) == VMap.end()) {
-    uint32_t V = get_uint32_t();
-    VMap[in] = V;
-    return V;
-  } else {
-    return VMap[in];
-  }
-}
-
-
 unsigned CryptoUtils::scramble32(const unsigned in, const char key[16]) {
   assert(key != NULL && "CryptoUtils::scramble key=NULL");
 

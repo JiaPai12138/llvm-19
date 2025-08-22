@@ -20,11 +20,7 @@
 
 #include <cstdint>
 #include <cstdio>
-#include <map>
-#include <random>
-#include <stdint.h>
 #include <string>
-#include <unordered_map>
 
 namespace llvm {
 
@@ -117,15 +113,6 @@ public:
 
   // Scramble a 32-bit value depending on a 128-bit value
   unsigned scramble32(const unsigned in, const char key[16]);
-
-    // Scramble32 originally uses AES to generates the mapping relationship
-  // between a BB and its switchvar Hikari updates this by doing this using
-  // mt19937_64 in C++ STLs which is a faster but less cryprographically secured
-  // This method try to find the corresponding value from the VMap first, if not
-  // then use RNG to generate,fill and return the value
-  uint32_t
-  scramble32(uint32_t in,
-             std::unordered_map<uint32_t /*IDX*/, uint32_t /*VAL*/> &VMap);
 
   int sha256(const char *msg, unsigned char *hash);
 

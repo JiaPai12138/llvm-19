@@ -29,29 +29,11 @@ using namespace std;
 namespace llvm{
     std::string readAnnotate(Function *f); // 读取llvm.global.annotations中的annotation值
     bool toObfuscate(bool flag, llvm::Function *f, std::string const &attribute); // 判断是否开启混淆
-    bool toObfuscateBoolOption(Function *f, std::string option, bool *val); //获取混淆布尔变量，from hikari
-    bool toObfuscateUint32Option(Function *f, std::string option, uint32_t *val); //获取混淆整型变量, from hikari
-    void fixStack(Function &F); // 修复PHI指令和逃逸变量
+    void fixStack(Function *f); // 修复PHI指令和逃逸变量
     void FixBasicBlockConstantExpr(BasicBlock *BB);
     void FixFunctionConstantExpr(Function *Func);
-    void turnOffOptimization(Function *f);  //from hikari
     string rand_str(int len);
     // LLVM-MSVC有这个函数, 官方版LLVM没有 (LLVM:17.0.6 | LLVM-MSVC:3.2.6)
     void LowerConstantExpr(Function &F);
-    uint64_t getRandomNumber();
-    unsigned int getUniqueNumber(std::vector<unsigned int> &rand_list);
-    void getRandomNoRepeat(unsigned upper_bound, unsigned size,
-                       std::vector<unsigned> &result);
-    uint64_t getInverse(uint64_t a, uint64_t m);
-    void demoteRegisters(Function *f);
-
-
-    void annotation2Metadata(Module &M);
-    bool readAnnotationMetadata(Function *f, std::string annotation);
-    void writeAnnotationMetadata(Function *f, std::string annotation);
-    #if 0
-    std::map<GlobalValue*, StringRef> BuildAnnotateMap(Module& M);
-    #endif
-
 }
 #endif // LLVM_UTILS_H
