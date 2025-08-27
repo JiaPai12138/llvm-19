@@ -29,7 +29,7 @@ using namespace std;
 namespace llvm{
     std::string readAnnotate(Function *f); // 读取llvm.global.annotations中的annotation值
     bool toObfuscate(bool flag, llvm::Function *f, std::string const &attribute); // 判断是否开启混淆
-    void fixStack(Function *f); // 修复PHI指令和逃逸变量
+    void fixStack(Function &F); // 修复PHI指令和逃逸变量
     void FixBasicBlockConstantExpr(BasicBlock *BB);
     void FixFunctionConstantExpr(Function *Func);
     string rand_str(int len);

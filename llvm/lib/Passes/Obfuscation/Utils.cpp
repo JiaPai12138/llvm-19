@@ -183,96 +183,46 @@ static bool valueEscapes(const Instruction &Inst) {
  *
  * @param F
  */
+void llvm::fixStack(Function &F) {
+  // Insert all new allocas into entry block.
+  BasicBlock *BBEntry = &F.getEntryBlock();
+  assert(pred_empty(BBEntry) &&
+         "Entry block to function must not have predecessors!");
 
- void llvm::fixStack(Function *f) {
-  // Try to remove phi node and demote reg to stack
-  SmallVector<PHINode *, 8> tmpPhi;
-  SmallVector<Instruction *, 32> tmpReg;
-  BasicBlock *bbEntry = &*f->begin();
   // Find first non-alloca instruction and create insertion point. This is
   // safe if block is well-formed: it always have terminator, otherwise
   // we'll get and assertion.
-  BasicBlock::iterator I = bbEntry->begin();
+  BasicBlock::iterator I = BBEntry->begin();
   while (isa<AllocaInst>(I))
     ++I;
-  Instruction *AllocaInsertionPoint = &*I;
-  do {
-    tmpPhi.clear();
-    tmpReg.clear();
-    for (BasicBlock &i : *f) {
-      for (Instruction &j : i) {
-        if (isa<PHINode>(&j)) {
-          PHINode *phi = cast<PHINode>(&j);
-          tmpPhi.emplace_back(phi);
-          continue;
-        }
-        if (!(isa<AllocaInst>(&j) && j.getParent() == bbEntry) &&
-            (valueEscapes(j) || j.isUsedOutsideOfBlock(&i))) {
-          tmpReg.emplace_back(&j);
-          continue;
-        }
-      }
-    }
-#if LLVM_VERSION_MAJOR >= 19
-    for (Instruction *I : tmpReg)
-      DemoteRegToStack(*I, false, AllocaInsertionPoint->getIterator());
-    for (PHINode *P : tmpPhi)
-      DemotePHIToStack(P, AllocaInsertionPoint->getIterator());
-#else
-    for (Instruction *I : tmpReg)
-      DemoteRegToStack(*I, false, AllocaInsertionPoint);
-    for (PHINode *P : tmpPhi)
-      DemotePHIToStack(P, AllocaInsertionPoint);
-#endif
-  } while (tmpReg.size() != 0 || tmpPhi.size() != 0);
-}
 
-// Unlike O-LLVM which uses __attribute__ that is not supported by the ObjC
-// CFE. We use a dummy call here and remove the call later Very dumb and
-// definitely slower than the function attribute method Merely a hack
-bool readFlag(Function *f, std::string attribute) {
-  for (Instruction &I : instructions(f)) {
-    Instruction *Inst = &I;
-    if (CallInst *CI = dyn_cast<CallInst>(Inst)) {
-      if (CI->getCalledFunction() != nullptr &&
-#if LLVM_VERSION_MAJOR >= 18
-          CI->getCalledFunction()->getName().starts_with("hikari_" +
-                                                         attribute)) {
-#else
-          CI->getCalledFunction()->getName().startswith("hikari_" +
-                                                        attribute)) {
-#endif
-        CI->eraseFromParent();
-        return true;
-      }
-    }
-    if (InvokeInst *II = dyn_cast<InvokeInst>(Inst)) {
-      if (II->getCalledFunction() != nullptr &&
-#if LLVM_VERSION_MAJOR >= 18
-          II->getCalledFunction()->getName().starts_with("hikari_" +
-                                                         attribute)) {
-#else
-          II->getCalledFunction()->getName().startswith("hikari_" +
-                                                        attribute)) {
-#endif
-        BasicBlock *normalDest = II->getNormalDest();
-        BasicBlock *unwindDest = II->getUnwindDest();
-        BasicBlock *parent = II->getParent();
-        if (parent->size() == 1) {
-          parent->replaceAllUsesWith(normalDest);
-          II->eraseFromParent();
-          parent->eraseFromParent();
-        } else {
-          BranchInst::Create(normalDest, II);
-          II->eraseFromParent();
-        }
-        if (pred_size(unwindDest) == 0)
-          unwindDest->eraseFromParent();
-        return true;
-      }
-    }
-  }
-  return false;
+  CastInst *AllocaInsertionPoint = new BitCastInst(
+      Constant::getNullValue(Type::getInt32Ty(F.getContext())),
+      Type::getInt32Ty(F.getContext()), "fix_stack_point", &*I);
+
+  // Find the escaped instructions. But don't create stack slots for
+  // allocas in entry block.
+  std::list<Instruction *> WorkList;
+  for (Instruction &I : instructions(F))
+    if (!(isa<AllocaInst>(I) && I.getParent() == BBEntry) && valueEscapes(I))
+      WorkList.push_front(&I);
+
+  // Demote escaped instructions
+  //NumRegsDemoted += WorkList.size();
+  for (Instruction *I : WorkList)
+    DemoteRegToStack(*I, false, AllocaInsertionPoint); //fix for llvm 18
+
+  WorkList.clear();
+
+  // Find all phi's
+  for (BasicBlock &BB : F)
+    for (auto &Phi : BB.phis())
+      WorkList.push_front(&Phi);
+
+  // Demote phi nodes
+  //NumPhisDemoted += WorkList.size();
+  for (Instruction *I : WorkList)
+    DemotePHIToStack(cast<PHINode>(I), AllocaInsertionPoint); //fix for llvm18
 }
 
 /**

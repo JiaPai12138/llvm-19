@@ -47,10 +47,12 @@ bool FlatteningPass::flatten(Function &F) {
     origBB.erase(origBB.begin());
     BasicBlock &entryBB = F.getEntryBlock();
     // 如果第一个基本块的末尾是条件跳转，单独分离
+    bool bEntryBB_isConditional = false;
     if(BranchInst *br = dyn_cast<BranchInst>(entryBB.getTerminator())){
         if(br->isConditional()){
             BasicBlock *newBB = entryBB.splitBasicBlock(br, "newBB");
             origBB.insert(origBB.begin(), newBB);
+            bEntryBB_isConditional = true;
         }
     }
 
@@ -60,7 +62,9 @@ bool FlatteningPass::flatten(Function &F) {
     BranchInst::Create(dispatchBB, returnBB);
     entryBB.moveBefore(dispatchBB);
     // 去除第一个基本块末尾的跳转
-    entryBB.getTerminator()->eraseFromParent();
+    if (bEntryBB_isConditional) {
+        entryBB.getTerminator()->eraseFromParent();
+    }
     // 使第一个基本块跳转到dispatchBB
     BranchInst *brDispatchBB = BranchInst::Create(dispatchBB, &entryBB);
 
@@ -115,7 +119,7 @@ bool FlatteningPass::flatten(Function &F) {
             BranchInst::Create(returnBB, BB);
         }
     }
-    fixStack(&F); // 修复逃逸变量和PHI指令
+    fixStack(F); // 修复逃逸变量和PHI指令
     return true;
 }
 

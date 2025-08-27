@@ -38,7 +38,6 @@ static cl::opt<int> SplitNum("split_num", cl::init(3), cl::desc("Split <split_nu
 PreservedAnalyses SplitBasicBlockPass::run(Function& F, FunctionAnalysisManager& AM) {
     Function *tmp = &F; // 传入的Function
     if (toObfuscate(flag, tmp, "split")){ // 判断什么函数需要开启混淆
-        // errs() << "run split on function "<<F.getName() <<"\n";
         split(tmp); // 分割流程
         ++Split; // 计次
         return PreservedAnalyses::none();
