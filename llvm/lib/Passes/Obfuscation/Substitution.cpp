@@ -102,17 +102,17 @@ bool SubstitutionPass::substitute(Function *f) {
             break;
           case Instruction::And:
             (this->*
-             funcAnd[llvm::cryptoutils->get_range(2)])(cast<BinaryOperator>(inst));
+             funcAnd[llvm::cryptoutils->get_range(NUMBER_AND_SUBST)])(cast<BinaryOperator>(inst));
             ++And;
             break;
           case Instruction::Or:
             (this->*
-             funcOr[llvm::cryptoutils->get_range(2)])(cast<BinaryOperator>(inst));
+             funcOr[llvm::cryptoutils->get_range(NUMBER_AND_SUBST)])(cast<BinaryOperator>(inst));
             ++Or;
             break;
           case Instruction::Xor:
             (this->*
-             funcXor[llvm::cryptoutils->get_range(2)])(cast<BinaryOperator>(inst));
+             funcXor[llvm::cryptoutils->get_range(NUMBER_AND_SUBST)])(cast<BinaryOperator>(inst));
             ++Xor;
             break;
           default:
