@@ -119,7 +119,7 @@ bool FlatteningPass::flatten(Function &F) {
             BranchInst::Create(returnBB, BB);
         }
     }
-    fixStack(F); // 修复逃逸变量和PHI指令
+    fixStack(&F); // 修复逃逸变量和PHI指令
     return true;
 }
 
