@@ -64,7 +64,7 @@ jobs:
     steps:
     # It's good practice to use setup-python, but this is also required on macos-14
     # due to https://github.com/actions/runner-images/issues/10385
-    - uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f
+    - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
       with:
         python-version: '3.12'
 
@@ -188,7 +188,7 @@ jobs:
       uses: ./workflows-main/.github/workflows/release-binaries-setup-stage
 
     - name: Setup sccache
-      uses: hendrikmuhs/ccache-action@ca3acd2731eef11f1572ccb126356c2f9298d35e # v1.2.9
+      uses: hendrikmuhs/ccache-action@63069e3931dedbf3b63792097479563182fe70d1 # v1.2.18
       with:
         # Default to 2G to workaround: https://github.com/hendrikmuhs/ccache-action/issues/174
         max-size: 2G
@@ -429,14 +429,14 @@ jobs:
         sparse-checkout-cone-mode: false
 
     - name: 'Download artifact'
-      uses: actions/download-artifact@448e3f862ab3ef47aa50ff917776823c9946035b # v4.1.1
+      uses: actions/download-artifact@abefc31eafcfbdf6c5336127c1346fdae79ff41c # v4.1.1
       with:
         pattern: '*-release-binary'
         merge-multiple: true
 
     - name: Attest Build Provenance
       id: provenance
-      uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
+      uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
       with:
         subject-path: ${{ needs.prepare.outputs.release-binary-filename }}
 
