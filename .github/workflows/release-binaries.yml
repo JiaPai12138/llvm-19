@@ -64,7 +64,7 @@ jobs:
     steps:
     # It's good practice to use setup-python, but this is also required on macos-14
     # due to https://github.com/actions/runner-images/issues/10385
-    - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c
+    - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
       with:
         python-version: '3.12'
 
@@ -188,7 +188,7 @@ jobs:
       uses: ./workflows-main/.github/workflows/release-binaries-setup-stage
 
     - name: Setup sccache
-      uses: hendrikmuhs/ccache-action@bfa03e1de4d7f7c3e80ad9109feedd05c4f5a716 # v1.2.19
+      uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2.20
       with:
         # Default to 2G to workaround: https://github.com/hendrikmuhs/ccache-action/issues/174
         max-size: 2G
