@@ -8,11 +8,3 @@ updates:
       github-actions:
         patterns:
           - "*"
-  - package-ecosystem: "pip"
-    directory: "/llvm/docs"
-    schedule:
-      interval: "monthly"
-    groups:
-      llvm-docs-requirements:
-        patterns:
-          - "*"
